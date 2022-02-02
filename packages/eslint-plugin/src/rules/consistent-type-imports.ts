@@ -6,7 +6,7 @@ import {
 } from '@typescript-eslint/utils';
 import * as util from '../util';
 
-type Prefer = 'type-imports' | 'no-type-imports';
+type Prefer = 'type-imports' | 'no-type-imports' | 'mixed-type-imports';
 
 type Options = [
   {
@@ -77,7 +77,7 @@ export default util.createRule<Options, MessageIds>({
         type: 'object',
         properties: {
           prefer: {
-            enum: ['type-imports', 'no-type-imports'],
+            enum: ['type-imports', 'no-type-imports', 'mixed-type-imports'],
           },
           disallowTypeAnnotations: {
             type: 'boolean',
@@ -104,7 +104,7 @@ export default util.createRule<Options, MessageIds>({
     const sourceImportsMap: { [key: string]: SourceImports } = {};
 
     return {
-      ...(prefer === 'type-imports'
+      ...(['type-imports', 'mixed-type-imports'].includes(prefer)
         ? {
             // prefer type imports
             ImportDeclaration(node): void {
@@ -267,6 +267,11 @@ export default util.createRule<Options, MessageIds>({
                     });
                   } else {
                     const isTypeImport = report.node.importKind === 'type';
+
+                    // if we prefer mixed type/value import, we'll not touch
+                    if (prefer === 'mixed-type-imports') {
+                      continue;
+                    }
 
                     // we have a mixed type/value import, so we need to split them out into multiple exports
                     const importNames = (

@@ -114,6 +114,14 @@ ruleTester.run('consistent-type-imports', rule, {
       `,
       options: [{ prefer: 'no-type-imports' }],
     },
+    {
+      code: `
+        import { A, B } from 'foo';
+        type T = A;
+        const b = B;
+      `,
+      options: [{ prefer: 'mixed-type-imports' }],
+    },
     `
       import { type A, B } from 'foo';
       type T = A;
